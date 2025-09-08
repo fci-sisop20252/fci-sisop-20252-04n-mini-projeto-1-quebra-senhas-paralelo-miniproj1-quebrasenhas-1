@@ -66,7 +66,11 @@ int main(int argc, char *argv[]) {
     // Verificar se argc == 5 (programa + 4 argumentos)
     // Se não, imprimir mensagem de uso e sair com código 1
     
-    // IMPLEMENTE AQUI: verificação de argc e mensagem de erro
+    if (argc < 5) {
+        fprintf(stderr, "Uso: %s <hash> <tamanho> <charset> <workers>\n", argv[0]);
+        fprintf(stderr, "Erro: argumentos insuficientes\n");
+        return 1;
+    }
     
     // Parsing dos argumentos (após validação)
     const char *target_hash = argv[1];
@@ -77,8 +81,21 @@ int main(int argc, char *argv[]) {
     
     // TODO: Adicionar validações dos parâmetros
     // - password_len deve estar entre 1 e 10
+    if (password_len < 1 || password_len > 10){
+        fprintf("Tamanho de senha inválido!\n");
+        return 1;
+    }
     // - num_workers deve estar entre 1 e MAX_WORKERS
+    if (num_workers <1 || num_workers >MAX_WORKERS){
+        fprintf("Número de workers inválido!\n");
+        return 1;
+    }
     // - charset não pode ser vazio
+
+    if (charset_len == 0){
+        fprintf("Charset está vazio!");
+        return 1;
+    }
     
     printf("=== Mini-Projeto 1: Quebra de Senhas Paralelo ===\n");
     printf("Hash MD5 alvo: %s\n", target_hash);
@@ -101,8 +118,8 @@ int main(int argc, char *argv[]) {
     // DICA: Use divisão inteira e distribua o resto entre os primeiros workers
     
     // IMPLEMENTE AQUI:
-    // long long passwords_per_worker = ?
-    // long long remaining = ?
+    long long passwords_per_worker = total_space/num_workers;  
+    long long remaining = total_space % num_workers;
     
     // Arrays para armazenar PIDs dos workers
     pid_t workers[MAX_WORKERS];
@@ -110,16 +127,43 @@ int main(int argc, char *argv[]) {
     // TODO 3: Criar os processos workers usando fork()
     printf("Iniciando workers...\n");
     
+    long long index_inicio = 0;
     // IMPLEMENTE AQUI: Loop para criar workers
     for (int i = 0; i < num_workers; i++) {
         // TODO: Calcular intervalo de senhas para este worker
+        long long count = passwords_per_worker;
+        if (i < remaining) {
+            count++;
+        }
+        long long index_fim = index_inicio + count -1;
         // TODO: Converter indices para senhas de inicio e fim
+        char primeira_senha[password_len+1];
+        char ultima_senha[password_len+1]; 
+        index_to_password(start_index, charset, charset_len, password_len, start_pass);
+        index_to_password(end_index, charset, charset_len, password_len, end_pass);
         // TODO 4: Usar fork() para criar processo filho
-        // TODO 5: No processo pai: armazenar PID
         // TODO 6: No processo filho: usar execl() para executar worker
+        // TODO 5: No processo pai: armazenar PID
         // TODO 7: Tratar erros de fork() e execl()
+        pid_t pid = fork();
+        if (pid < 0) {
+            perror("Erro no fork!");
+            exit(1);
+            
+        } 
+        // APENAS O FILHO EXECUTA AQUI
+        else if (pid == 0) {
+            execl("./worker", "worker", target_hash, primeira_senha, ultima_senha, charset, (char *)NULL);
+            perror("Erro em execl");
+            exit(1);
+        }         
+        // APENAS O PAI EXECUTA AQUI
+        else {
+            printf("Worker %d criado (PID %d) -> intervalo [%s .. %s]\n", i, pid, primeira_senha, ultima_senha);  
+        }
+        index_inicio = index_fim + 1;
     }
-    
+         
     printf("\nTodos os workers foram iniciados. Aguardando conclusão...\n");
     
     // TODO 8: Aguardar todos os workers terminarem usando wait()
