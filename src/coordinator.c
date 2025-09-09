@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
     // - Contar quantos workers terminaram
     int workers_finalizados = 0;
     int status;
-    
+
     while (finished_workers < num_workers) {
         pid_t pid = wait(&status); // espera qualquer filho
         if (pid == -1) {
