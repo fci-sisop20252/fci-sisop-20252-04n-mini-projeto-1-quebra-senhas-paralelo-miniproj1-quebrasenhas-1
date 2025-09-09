@@ -175,6 +175,29 @@ int main(int argc, char *argv[]) {
     // - Identificar qual worker terminou
     // - Verificar se terminou normalmente ou com erro
     // - Contar quantos workers terminaram
+    int workers_finalizados = 0;
+    int status;
+    
+    while (finished_workers < num_workers) {
+        pid_t pid = wait(&status); // espera qualquer filho
+        if (pid == -1) {
+            perror("Erro no wait()");
+            exit(1);
+        }
+
+        if(WIFEXITED(status)){
+            int exit_code = WEXITSTATUS(status);
+                printf("Worker (PID %d) terminou normalmente com código %d\n", pid, exit_code);
+        }
+        else if (WIFSIGNALED(status)) {
+                printf("Worker (PID %d) terminou por sinal %d\n", pid, WTERMSIG(status));
+        }
+        else {
+                printf("Worker (PID %d) terminou de forma inesperada\n", pid);
+        }
+
+        workers_finalizados++;
+    }
     
     // Registrar tempo de fim
     time_t end_time = time(NULL);
@@ -194,6 +217,35 @@ int main(int argc, char *argv[]) {
     
     // Estatísticas finais (opcional)
     // TODO: Calcular e exibir estatísticas de performance
+    FILE *fp = fopen(RESULT_FILE, "r");
+    if (fp != NULL) {
+        char linha[256];
+        if (fgets(linha, sizeof(linha), fp) != NULL) {
+            linha[strcspn(linha, "\n")] = 0;
+
+            char *token = strtok(linha, ":");
+            if (token != NULL) {
+                int worker_id = atoi(token);
+                char *senha = strtok(NULL, ":");
+
+                if (senha != NULL) {
+                    char hash_gerado[33];
+                    md5_string(senha, hash_gerado);
+
+                    if (strcmp(hash_gerado, target_hash) == 0) {
+                        printf("Senha encontrada pelo worker %d: %s\n", worker_id, senha);
+                    } else {
+                        printf("Aviso: Senha lida do arquivo não corresponde ao hash!\n");
+                    }
+                }
+            }
+        }
+        fclose(fp);
+    } else {
+        printf("Nenhum worker encontrou a senha.\n");
+    }
+
+    printf("Tempo total de execução: %.2f segundos\n", elapsed_time);
     
     return 0;
 }
