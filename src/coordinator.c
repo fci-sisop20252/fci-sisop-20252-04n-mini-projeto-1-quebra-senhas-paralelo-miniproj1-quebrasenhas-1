@@ -82,18 +82,18 @@ int main(int argc, char *argv[]) {
     // TODO: Adicionar validações dos parâmetros
     // - password_len deve estar entre 1 e 10
     if (password_len < 1 || password_len > 10){
-        fprintf("Tamanho de senha inválido!\n");
+        printf("Tamanho de senha inválido!\n");
         return 1;
     }
     // - num_workers deve estar entre 1 e MAX_WORKERS
     if (num_workers <1 || num_workers >MAX_WORKERS){
-        fprintf("Número de workers inválido!\n");
+        printf("Número de workers inválido!\n");
         return 1;
     }
     // - charset não pode ser vazio
 
     if (charset_len == 0){
-        fprintf("Charset está vazio!");
+        printf("Charset está vazio!");
         return 1;
     }
     
@@ -139,8 +139,8 @@ int main(int argc, char *argv[]) {
         // TODO: Converter indices para senhas de inicio e fim
         char primeira_senha[password_len+1];
         char ultima_senha[password_len+1]; 
-        index_to_password(start_index, charset, charset_len, password_len, start_pass);
-        index_to_password(end_index, charset, charset_len, password_len, end_pass);
+        index_to_password(index_inicio, charset, charset_len, password_len, primeira_senha);
+        index_to_password(index_fim, charset, charset_len, password_len, ultima_senha);
         // TODO 4: Usar fork() para criar processo filho
         // TODO 6: No processo filho: usar execl() para executar worker
         // TODO 5: No processo pai: armazenar PID
@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
     int workers_finalizados = 0;
     int status;
 
-    while (finished_workers < num_workers) {
+    while (workers_finalizados < num_workers) {
         pid_t pid = wait(&status); // espera qualquer filho
         if (pid == -1) {
             perror("Erro no wait()");
