@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
     long long remaining = total_space % num_workers;
     
     // Arrays para armazenar PIDs dos workers
-    pid_t workers[MAX_WORKERS];
+    pid_t array_workers[MAX_WORKERS];
     
     // TODO 3: Criar os processos workers usando fork()
     printf("Iniciando workers...\n");
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
         }         
         // APENAS O PAI EXECUTA AQUI
         else {
-            printf("Worker %d criado (PID %d) -> intervalo [%s .. %s]\n", i, pid, primeira_senha, ultima_senha);  
+            printf("Worker %d criado (PID %d) -> intervalo [%s .. %s]\n", i, array_workers[i], primeira_senha, ultima_senha);  
         }
         index_inicio = index_fim + 1;
     }
