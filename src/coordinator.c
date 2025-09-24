@@ -139,12 +139,18 @@ int main(int argc, char *argv[]) {
         // TODO: Converter indices para senhas de inicio e fim
         char primeira_senha[password_len+1];
         char ultima_senha[password_len+1]; 
+        char s_len[16];
+        char s_id[16];
+
         index_to_password(index_inicio, charset, charset_len, password_len, primeira_senha);
         index_to_password(index_fim, charset, charset_len, password_len, ultima_senha);
         // TODO 4: Usar fork() para criar processo filho
         // TODO 6: No processo filho: usar execl() para executar worker
         // TODO 5: No processo pai: armazenar PID
         // TODO 7: Tratar erros de fork() e execl()
+        snprintf(s_len, sizeof(s_len), "%d", password_len);
+        snprintf(s_id, sizeof(s_id), "%d", i);
+        
         pid_t pid = fork();
         if (pid < 0) {
             perror("Erro no fork!");
@@ -153,7 +159,7 @@ int main(int argc, char *argv[]) {
         } 
         // APENAS O FILHO EXECUTA AQUI
         else if (pid == 0) {
-            execl("./worker", "worker", target_hash, primeira_senha, ultima_senha, charset, (char *)NULL);
+            execl("./worker", "worker", target_hash, primeira_senha, ultima_senha, charset, s_len, s_id, (char *)NULL);
             perror("Erro em execl");
             exit(1);
         }         

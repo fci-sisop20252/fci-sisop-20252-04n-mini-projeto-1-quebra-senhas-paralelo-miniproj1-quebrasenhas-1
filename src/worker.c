@@ -150,6 +150,12 @@ int main(int argc, char *argv[]) {
                 printf("[Worker %d]: Outro worker já encontrou a senha. Encerrando\n", worker_id);
                 break;
             }
+            time_t now = time(NULL);
+            if (difftime(now, last_progress_time) >= 1.0) {
+                printf("[Worker %d] Progresso: %lld senhas testadas até agora...\n",
+                    worker_id, passwords_checked);
+                last_progress_time = now;
+            }
         }
         
         // TODO 4: Calcular o hash MD5 da senha atual
