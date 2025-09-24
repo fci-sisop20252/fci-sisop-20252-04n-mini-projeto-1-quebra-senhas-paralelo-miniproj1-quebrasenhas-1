@@ -159,6 +159,7 @@ int main(int argc, char *argv[]) {
         }         
         // APENAS O PAI EXECUTA AQUI
         else {
+            array_workers[i] = pid;
             printf("Worker %d criado (PID %d) -> intervalo [%s .. %s]\n", i, array_workers[i], primeira_senha, ultima_senha);  
         }
         index_inicio = index_fim + 1;
