@@ -48,7 +48,7 @@ int increment_password(char *password, const char *charset, int charset_len, int
     
     for(int i = password_len - 1; i >=0; i--){
         int indice = 0;
-        while(indice < charset_len && charset[i] != password [i]){
+        while(indice < charset_len && charset[indice] != password [i]){
             indice++;
         }
         if(indice >= charset_len){
@@ -97,15 +97,15 @@ void save_result(int worker_id, const char *password) {
     // - Tentar abrir arquivo com O_CREAT | O_EXCL | O_WRONLY
     // - Se sucesso: escrever resultado e fechar
     // - Se falhou: outro worker já encontrou
-    int fd = open(RESULT_FILE, O_CREAT | O_EXCL | O_WRONLY, 0644){
-        if (fd >= 0){
-            char buffer = [256];
-            int len = snprintf( buffer, sizeof(buffer), "%d:%s\n", worker_id, password);
-            write( fd, buffer, len);
-            close(fd);
-            printf("[Worker %d] resultado salvo!\n", worker_id);
-        }
+    int fd = open(RESULT_FILE, O_CREAT | O_EXCL | O_WRONLY, 0644);
+    if (fd >= 0){
+        char buffer[256];
+        int len = snprintf( buffer, sizeof(buffer), "%d:%s\n", worker_id, password);
+        write( fd, buffer, len);
+        close(fd);
+        printf("[Worker %d] resultado salvo!\n", worker_id);
     }
+    
 }
 
 /**
@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
         
         // TODO: Verificar se chegou ao fim do intervalo
         // Se sim: terminar loop
-        if(password_compare(current_password, end_password))> 0{
+        if(password_compare(current_password, end_password)> 0){
             break;
         }
         
